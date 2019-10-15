@@ -119,6 +119,16 @@ class CPU:
                 offset = (command >> 6) + 1
                 self.pc += offset
 
+            elif command == 162:
+                R0 = self.registers[self.ram[self.pc + 1]]
+                R1 = self.registers[self.ram[self.pc + 2]]
+
+                MUL = R0 * R1
+                self.registers[self.ram[self.pc + 1]] = MUL
+
+                offset = (command >> 6) + 1
+                self.pc += offset
+
 
             elif command == 1:
                 running = False
