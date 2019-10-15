@@ -63,9 +63,12 @@ class CPU:
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
+  
+        if op == 'ADD':
+            self.registers[reg_a] += self.registers[reg_b]
 
-        if op == "ADD":
-            self.reg[reg_a] += self.reg[reg_b]
+        elif op == 162:   #multiplication
+            self.registers[reg_a] *= self.registers[reg_b]
         #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
@@ -120,11 +123,15 @@ class CPU:
                 self.pc += offset
 
             elif command == 162:
-                R0 = self.registers[self.ram[self.pc + 1]]
-                R1 = self.registers[self.ram[self.pc + 2]]
+                # R0 = self.registers[self.ram[self.pc + 1]]
+                # R1 = self.registers[self.ram[self.pc + 2]]
 
-                MUL = R0 * R1
-                self.registers[self.ram[self.pc + 1]] = MUL
+                # MUL = R0 * R1
+                # self.registers[self.ram[self.pc + 1]] = MUL
+
+                
+
+                self.alu(162, self.ram[self.pc + 1], self.ram[self.pc + 2])
 
                 offset = (command >> 6) + 1
                 self.pc += offset
