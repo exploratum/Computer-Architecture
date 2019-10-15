@@ -5,11 +5,12 @@ import sys
 class CPU:
     """Main CPU class."""
 
-    def __init__(self):
+    def __init__(self, filename):
         """Construct a new CPU."""
-        self.pc = 0             #counter
-        self.SP = 0xF4          #stack pointer
-        self.ram = [0] * 256    # memory where to store programs and data
+        self.filename = filename    # instruction data file
+        self.pc = 0                 #counter
+        self.SP = 0xF4              #stack pointer
+        self.ram = [0] * 256        # memory where to store programs and data
 
         # Registers
         self.registers = [0] * 8
@@ -21,21 +22,43 @@ class CPU:
 
         address = 0
 
+        try:
+
+            with open(self.filename) as f:
+                for line in f:
+                    comment_split = line.split('#')
+                    num = comment_split[0].strip()
+                    try:
+                        val = int(num, 2)
+                        self.ram[address] = val
+                        address += 1
+                    except ValueError:
+                        # print("warning: value cannot be translated as int")
+                        continue
+
+
+                    
+
+        except FileNotFoundError:
+            print(f"{sys.argv[0]}: {sys.argv[1]} not found")
+            sys.exit(2)
+
+
         # For now, we've just hardcoded a program:
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111, # PRN R0
+        #     0b00000000,
+        #     0b00000001, # HLT
+        # ]
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        # for instruction in program:
+        #     self.ram[address] = instruction
+        #     address += 1
 
 
     def alu(self, op, reg_a, reg_b):
@@ -70,22 +93,36 @@ class CPU:
     def run(self):
         """Run the CPU."""
 
+        # if len(sys.argv)!= 2:
+        #     print("usage cpu.py <filename>", file=sys.stderr)
+        #     sys.exit(2)
+
+        # self.load
+
+
         running = True
+
 
         while running:
 
+
             command = self.ram[self.pc]
 
-            if command == 0b10000010:
+            if command == 130:
                 self.registers[self.ram[self.pc + 1]] = self.ram[self.pc + 2]
-                self.pc += 3
+                offset = (command >> 6) + 1
+                self.pc += offset
 
-            elif command == 0b01000111:
+
+            elif command == 71:
                 print(self.registers[self.ram[self.pc + 1]])
-                self.pc += 2
+                offset = (command >> 6) + 1
+                self.pc += offset
 
-            elif command == 0b00000001:
+
+            elif command == 1:
                 running = False
+
             
             else:
                 sys.exit(1)
