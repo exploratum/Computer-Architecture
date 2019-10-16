@@ -14,7 +14,7 @@ class CPU:
 
         # Registers
         self.registers = [0] * 8
-        self.reg = [0] * 2
+        # self.reg = [0] * 2
 
 
     def load(self):
@@ -79,6 +79,7 @@ class CPU:
         from run() if you need help debugging.
         """
 
+
         print(f"TRACE: %02X | %02X %02X %02X |" % (
             self.pc,
             #self.fl,
@@ -89,18 +90,12 @@ class CPU:
         ), end='')
 
         for i in range(8):
-            print(" %02X" % self.reg[i], end='')
+            print(" %02X" % self.registers[i], end='')
 
         print()
 
     def run(self):
         """Run the CPU."""
-
-        # if len(sys.argv)!= 2:
-        #     print("usage cpu.py <filename>", file=sys.stderr)
-        #     sys.exit(2)
-
-        # self.load
 
 
         running = True
@@ -111,10 +106,13 @@ class CPU:
 
             command = self.ram[self.pc]
 
-            if command == 130:
+            if command == 130:      #LOAD
                 self.registers[self.ram[self.pc + 1]] = self.ram[self.pc + 2]
                 offset = (command >> 6) + 1
                 self.pc += offset
+
+                self.trace()
+
 
 
             elif command == 71:
@@ -122,19 +120,29 @@ class CPU:
                 offset = (command >> 6) + 1
                 self.pc += offset
 
-            elif command == 162:
-                # R0 = self.registers[self.ram[self.pc + 1]]
-                # R1 = self.registers[self.ram[self.pc + 2]]
-
-                # MUL = R0 * R1
-                # self.registers[self.ram[self.pc + 1]] = MUL
-
-                
+            elif command == 162:    # MULTIPLY
 
                 self.alu(162, self.ram[self.pc + 1], self.ram[self.pc + 2])
 
                 offset = (command >> 6) + 1
                 self.pc += offset
+
+            elif command == 69:     #PUSH
+                self.SP -= 1
+                self.ram[self.SP] = self.registers[self.ram[self.pc + 1]]
+                self.trace()
+
+                
+                offset = (command >> 6) + 1
+                self.pc += offset
+
+            elif command == 70:      #POP
+                self.registers[self.ram[self.pc + 1]] = self.ram[self.SP]
+                self.SP += 1
+
+                offset = (command >> 6) + 1
+                self.pc += offset
+                self.trace()
 
 
             elif command == 1:
@@ -143,6 +151,8 @@ class CPU:
             
             else:
                 sys.exit(1)
+
+            
 
 
 
