@@ -64,10 +64,10 @@ class CPU:
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
   
-        if op == 'ADD':
+        if op == 160:     #ADD
             self.registers[reg_a] += self.registers[reg_b]
 
-        elif op == 162:   #multiplication
+        elif op == 162:   #MULT
             self.registers[reg_a] *= self.registers[reg_b]
         #elif op == "SUB": etc
         else:
@@ -107,21 +107,22 @@ class CPU:
             command = self.ram[self.pc]
 
             if command == 130:      #LOAD
+
                 self.registers[self.ram[self.pc + 1]] = self.ram[self.pc + 2]
                 offset = (command >> 6) + 1
                 self.pc += offset
 
-                self.trace()
-
-
-
-            elif command == 71:
+            elif command == 71:       #PRINT
                 print(self.registers[self.ram[self.pc + 1]])
                 offset = (command >> 6) + 1
                 self.pc += offset
 
-            elif command == 162:    # MULTIPLY
+            elif command == 160:     #ADD
+                self.alu(160, self.ram[self.pc + 1], self.ram[self.pc + 2])
+                offset = (command >> 6) + 1
+                self.pc += offset
 
+            elif command == 162:    # MULTIPLY
                 self.alu(162, self.ram[self.pc + 1], self.ram[self.pc + 2])
 
                 offset = (command >> 6) + 1
@@ -130,7 +131,6 @@ class CPU:
             elif command == 69:     #PUSH
                 self.SP -= 1
                 self.ram[self.SP] = self.registers[self.ram[self.pc + 1]]
-                self.trace()
 
                 
                 offset = (command >> 6) + 1
@@ -142,7 +142,21 @@ class CPU:
 
                 offset = (command >> 6) + 1
                 self.pc += offset
-                self.trace()
+
+            
+            elif command == 80:      #CALL
+
+                self.SP -= 1
+                self.ram[self.SP] = self.pc + 2
+                address = self.registers[self.ram[self.pc + 1]]
+                self.pc = address
+
+
+            elif command == 17:      #RET
+
+                self.pc = self.ram[self.SP]
+                self.SP += 1
+
 
 
             elif command == 1:
@@ -151,10 +165,6 @@ class CPU:
             
             else:
                 sys.exit(1)
-
-            
-
-
 
 
     def ram_read(self, MAR):
